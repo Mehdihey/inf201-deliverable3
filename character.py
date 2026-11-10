@@ -96,6 +96,36 @@ class Warrior(Character):
         """Reduce incoming damage by armor before applying it"""
         reduced = max(amount - self.armor, 0) #armor cannot turn a hit into healing
         return super().take_damage(reduced)
+class Mage(Character):
+    """ A resourse-based attacker that spends mana on double-damage spells"""
+    def __init__(self, name:str, hp_max: int= 100, damage:int = 10, weapon: Weapon | None = None, mana: int = 30, mana_max: int = 30) -> None:
+        """
+        Initialise the mage
+        
+        Args:
+            name, hp_max, damage, weapon: same as for character
+            mana (int): starting mana points
+            mana_max (int): maximum mana points
+        """
+        super().__init__(name, hp_max, damage, weapon)
+        self._mana = mana #private, like_hp
+        self.mana_max = mana_max
+
+    @property
+    def mana(self) -> int:
+        """Read-omly property: current mana"""
+        return self._mana
+
+    def attack(self, target) -> int:
+        """Cast a spell(double base damage, costs 10 mana) if enough mana,
+         otherwise do a normal attack and regain5 mana """
+        if self._mana >= 10:
+            self._mana -= 10
+            return target.take_damage(self.damage * 2) #Spell ignores weapon
+        damage_dealt = super().attack(target) #normal attack, uses weapon if equipped
+        self._mana = min(self._mana + 5, self.mana_max) #mana cannot exceed max
+        return damage_dealt
+
 if __name__ == "__main__":
 
     #Quick test
@@ -155,3 +185,14 @@ print(tank.hp) #Expected: 95 unchanged
 tank.heal(5) #inherited from Character!
 print(tank.hp) #Expected: 100
 print(tank.is_alive) #Expected: True (also inherited)
+
+
+# Task 3: Mage
+staff = Weapon("Staff", Dice(sides=6))
+merlin = Mage("Merlin", weapon=staff)
+target = Character("Target, hp_max = 500") ##lots of HP
+
+print(merlin.mana) #Expected: 30
+for turn in range(1, 7):
+    dealt = merlin.attack(target)
+    print(f"Turn {turn}: dealt {dealt}, mana left {merlin.mana}")
