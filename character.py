@@ -77,6 +77,25 @@ class Character:
         """Public read-only property to inspect HP without allowing direct, unsafe edits."""
         return self._hp
 
+
+class Warrior(Character):
+    """A defensive specialist whose armor reduces incoming damage """
+    def __init__(self, name: str, hp_max: int = 100, damage:int = 10, weapon:Weapon | None = None, armor:int = 5) -> None:
+        """
+        Initialise the Warrior 
+        
+        Args:
+            name, hp_max, damage, weapon: same as for charecter
+            armor (int): Amount subtracted from every incoming hit
+
+        """
+        super().__init__(name, hp_max, damage, weapon)
+        self.armor = armor
+
+    def take_damage(self, amount: int) -> int:
+        """Reduce incoming damage by armor before applying it"""
+        reduced = max(amount - self.armor, 0) #armor cannot turn a hit into healing
+        return super().take_damage(reduced)
 if __name__ == "__main__":
 
     #Quick test
@@ -120,3 +139,19 @@ for _ in range(3):
     print(peasant.attack(dummy)) #allways 10
 
 print(dummy.hp)
+
+
+# Task 4:Warrior test
+tank = Warrior("Tank")
+print(tank.armor) #Expected:5
+
+peasant.attack(tank) #10 damage - 5 armor = 5
+print(tank.hp) #Expected: 95
+
+weak = Character("Weak", damage=3)
+weak.attack(tank) # 3 - 5 -> 0 no healing
+print(tank.hp) #Expected: 95 unchanged
+
+tank.heal(5) #inherited from Character!
+print(tank.hp) #Expected: 100
+print(tank.is_alive) #Expected: True (also inherited)
