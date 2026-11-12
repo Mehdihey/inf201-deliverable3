@@ -1,5 +1,6 @@
 #Item classes for the RPG battle simylator
 from dice import Dice
+
 class Weapon:
     """Represents a weapon whose damge is determined by rolling a dice"""
     def __init__(self, name:str, damage_dice:Dice) -> None:
